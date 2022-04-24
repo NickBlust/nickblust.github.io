@@ -2,7 +2,7 @@ title:              Nick's Game Blog
 email:              blust.nick@gmail.com
 description:        Displaying my latest Game Development Endeavours
 author:             Nick Blust
-baseurl:            "/nickblustblog"
+baseurl:            ""
 url:                "https://nickblust.github.io"
 
 # Social Profiles
@@ -17,6 +17,12 @@ github_username:    NickBlust
 
 # Build settings
 markdown:           kramdown
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+  syntax_highlighter_opts:
+    block:
+      line_numbers: true
 paginate:           5
 paginate_path:      "/posts/page:num/"
 plugins:
