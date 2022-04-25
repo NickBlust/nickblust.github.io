@@ -5,43 +5,172 @@ subtitle: "Recreating my previous 2D project in 3D!"
 date: 2022-04-22 12:00:00 -0300
 background: '/img/posts/grid3d-game.jpg'
 ---
-<p>WIP</p>
-<p>I cast Counterspell.</p>
 <!--
-    
-<p>Science cuts two ways, of course; its products can be used for both good and evil. But there's no turning back from science. The early warnings about technological dangers also come from science.</p>
+<style>
+    a:link {
+        color: blue;
+        background-color: transparent;
+        text-decoration: none;
+    }
 
-<p>What was most significant about the lunar voyage was not that man set foot on the Moon but that they set eye on the earth.</p>
+    a:visited {
+        color: pink;
+        background-color: transparent;
+        text-decoration: none;
+    }
 
-<p>A Chinese tale tells of some men sent to harm a young girl who, upon seeing her beauty, become her protectors rather than her violators. That's how I felt seeing the Earth for the first time. I could not help but love and cherish her.</p>
+    a:hover {
+        color: red;
+        background-color: transparent;
+        text-decoration: underline;
+    }
 
-<p>For those who have seen the Earth from space, and for the hundreds and perhaps thousands more who will, the experience most certainly changes your perspective. The things that we share in our world are far more valuable than those which divide us.</p>
+    a:active {
+        color: yellow;
+        background-color: transparent;
+        text-decoration: underline;
+    }
+</style>
+-->
 
-<h2 class="section-heading">The Final Frontier</h2>
+<p style="text-align:center">
+    <iframe width="520" height="360" src="https://nickblust.github.io/Grid3D-Demo/" title="3D Demo"
+            frameborder="0" allow="accelerometer" allowfullscreen></iframe>
+<span class="caption text-muted">Controls: WASD/Arrow keys for panning, hold right mouse additionally to rotate; scroll to zoom;
+    Demo of the project - pathfinding works with some restrictions (i.e. moving from water onto land is possible).</span>
+</p>
 
-<p>There can be no thought of finishing for ‘aiming for the stars.’ Both figuratively and literally, it is a task to occupy the generations. And no matter how much progress one makes, there is always the thrill of just beginning.</p>
+<p>
+    With the idea of (re)creating a strategy game on a hexagonal
+    grid in 3D, I set out to implement my own solution for a
+    3D (hexagonal) tilemap system. After some experimentation with
+    GL and trying to exploit Unity's 2D tilemap system,
+    I realised that a preview package existed that did exactly
+    the task I wanted to achieve: place Game Objects
+    on a tilemap (see
 
-<p>There can be no thought of finishing for ‘aiming for the stars.’ Both figuratively and literally, it is a task to occupy the generations. And no matter how much progress one makes, there is always the thrill of just beginning.</p>
+    <a style="color : blue" href="https://docs.unity3d.com/Packages/com.unity.2d.tilemap.extras@3.0/manual/GameObjectBrush.html">
+        GameObject Brush
+    </a> in the package's documentation).
+</p>
+<p>
+    Yet apparently this solution only works for square grids (I haven't tried
+    rectangular grids) - painting hexagonal tiles resulted in this:
+</p>
+<img class="img-fluid" src="\img\posts\grid3d-hex-fail.jpg" alt="Hex grid fail">
+<span class="caption text-muted">The tiles simply do not fit?!</span>
 
-<blockquote class="blockquote">The dreams of yesterday are the hopes of today and the reality of tomorrow. Science has not yet mastered prophecy. We predict too much for the next year and yet far too little for the next ten.</blockquote>
+<p>
+    So I ended up modyfing the script for the GameObject Brush,
+    with the result being what I called "<i>HexBrush</i>" - it allows
+    me to paint landscapes like this:
+    <p>
+        <img class="img-fluid" src="\img\posts\hex-grid-example.jpg" alt="Demo Image">
+        <span class="caption text-muted">The tiles simply do not fit?!</span>
+    </p>
 
-<p>Spaceflights cannot be stopped. This is not the work of any one man or even a group of men. It is a historical process which mankind is carrying out in accordance with the natural laws of human development.</p>
+    which actually fit the grid. Even more excitingly, we can actually
+    change the z-position of tiles to create 3D landscapes:
+    <p>
+        <img class="img-fluid" src="\img\posts\grid3d-3d-world.jpg" alt="An actual 3D map.">
+    </p>
+</p>
+<p>
+    One might be inclined to say "But if you increase the
+    z-position too much, there will be holes in the map..." - which is absolutely true and looks like this:
+</p>
+    <img class="img-fluid" src="\img\posts\grid3d-no-stretch.jpg" alt="Holes in the 3D map.">
+    <p>Does this mean this project is doomed? No.</p>
+<p>
+    Quite some blood, sweat and tears later I am proud to present
+    you this:
+</p>
+<p>
+    <img class="img-fluid" src="\img\posts\grid3d-fill-stretch.jpg" alt="Fixed holes in the 3D map.">
+</p>
+<p>
+    There is two reasons I am particularly proud of this:
+    <ol>
+        <li>The holes have been filled, and such holes will always be filled in maps automatically!</li>
+        <li>The vertex and triangle counts of the meshes can be reduced significantly (6 vertices and 4 triangles for one tile).</li>
+    </ol>
+    About the second point: I am using the free <a style="color : blue" href="https://www.kenney.nl/assets/hexagon-kit">hexagon kit by Kenney</a>.
+    Using Unity's built-in function for <a style="color : blue" href="https://docs.unity3d.com/ScriptReference/Mesh.CombineMeshes.html">combining meshes</a>
+    each tile uses 36 vertices and 16 triangles (48 vertex indices). The blood, sweat and tears I mentioned earlier
+    where invested into crafting a custom mesh-combination algorithm - the result being a reduction of the vertex count
+    to one 6<sup>th</sup>. For a flat map the number of triangles is reduced to one 4<sup>th</sup>,
+    which does not hold anymore when the first point of above list comes into play: Fixing holes in the tilemap is done in two steps:
+    <ul>
+        <li>All tiles are stretched s.t. their top surface stays at the same position but their bottom surface is at z = 0.</li>
+        <li>The required vertex indices are added to the list from which the mesh triangles are constructed.</li>
+    </ul>
+    To illustrate the result of this process look at the following picture:
+    <p>
+        <img class="img-fluid" src="\img\posts\grid3d-mesh-simplification.jpg" alt="Grid simplification">
+    </p>
+    The result of Unity's combine functionality is the mesh on the left-hand side (for simplicity a single tile is shown),
+    while all we need is the result of the custom algorithm (right-hand side mesh).
+</p>
+<p>
+    Look again at the two pictures above to see how filling holes introduces additional triangles!
+</p>
+<p>
+    Then I added some simple particle effects and a script to rotate the sails of wind mills and the wheels of water mills.
+    It's amazing how much nicer things look already with just a little effort :)
+    <p>
+        <img class="img-fluid" src="\img\posts\grid3d-game.jpg" alt="Adding smoke particles and adding rotation to mills.">
+    </p>
+</p>
+<p>
+    This is nice and all, but something important is missing! Maybe you noticed the humanoid model in above image?
+    Let's have this guy walk around!
+</p>
+<p>
+    Soon after Dijkstra's algorithm and A<sup>*</sup>-pathfininding are implemented and our guy can 
+    follow the shortest path between two vertices (you can try this yourself in the demo:
+    just click on two different tiles; if not already standing on the first tile, the model will be placed onto it automatically).
+</p>
+<p>
+    At this point I want to highlight these awesome tutorials on <a style="color : blue" href="https://www.redblobgames.com/pathfinding/a-star/introduction.html">pathfinding</a>
+    and <a style="color : blue" href="https://www.redblobgames.com/grids/hexagons/">hexagonal grids</a> and thank Amit Patel for sharing this amazing content!
+</p>
+<p>
+    Note that pathfinding in the demo has some quirks (which aren't particularly hard to fix, it just is not a high priority for me right now).
+    <ul>
+        <li>Walking one tile from water onto a shore is possible.</li>
+        <li>In fact, any tile is a feasible starting tile if the target tile is a direct neighbour (and a grass or forest tile).</li>
+        <li>Let's not talk about the orientation of the character... o.O</li>
+    </ul>
+        Also I haven't yet thought seriously about how to handle actual 3D grids, and especially terrain features like mountains - from a pure optical point of view.
+        Setting the z-coordinate of the target position to the top surface of a tile is no problem. But it also should look good - clipping through trees is already annoying enough...
+</p>
+<p>
+    Also you might have noticed that the mouse highlight in the demo does not work properly on tiles containing rivers,
+    the simple reasons behind that being the structure of the underlying mesh and my vertex extraction not working on it. Not yet!
+    <p>
+        <img class="img-fluid" src="\img\posts\grid3d-fail.jpg" alt="River tiles are weird.">
+    </p>
+</p>
+<!--
 
-<h2 class="section-heading">Reaching for the Stars</h2>
 
-<p>As we got further and further away, it [the Earth] diminished in size. Finally it shrank to the size of a marble, the most beautiful you can imagine. That beautiful, warm, living object looked so fragile, so delicate, that if you touched it with a finger it would crumble and fall apart. Seeing this has to change a man.</p>
+    unity's gameobject bush not working for hexagons
 
+    picture of reduced mesh and amount of reduction
+
+    picture of offset mesh
+
+    picture river mesh => explain fix
+
+    picture efx
+
+    picture highlight Dijkstra vs A* + both on top of eahc other
+
+    game demo
+-->
+<!--
 <img class="img-fluid" src="https://source.unsplash.com/Mn9Fa_wQH-M/800x450" alt="Demo Image">
 <span class="caption text-muted">To go places and do things that have never been done before – that’s what living is all about.</span>
 
-<p>Space, the final frontier. These are the voyages of the Starship Enterprise. Its five-year mission: to explore strange new worlds, to seek out new life and new civilizations, to boldly go where no man has gone before.</p>
-
-<p>As I stand out here in the wonders of the unknown at Hadley, I sort of realize there’s a fundamental truth to our nature, Man must explore, and this is exploration at its greatest.</p>
-
 <p>Placeholder text by <a href="http://spaceipsum.com/">Space Ipsum</a>. Photographs by <a href="https://unsplash.com/">Unsplash</a>.</p>
 -->
-
-<p align="center">
-    <iframe width="960" height="700" src="https://nickblust.github.io/Grid3D-Demo/" title="Demo"
-            frameborder="0" allow="accelerometer" allowfullscreen></iframe>
-</p>
