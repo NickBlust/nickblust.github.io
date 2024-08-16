@@ -1,5 +1,5 @@
 title:              Nick's Game Blog
-email:              blust.nick@gmail.com
+# email:              blust.nick@gmail.com
 description:        Displaying my latest Game Development Endeavours
 author:             Nick Blust
 baseurl:            ""
@@ -10,7 +10,7 @@ url:                "https://nickblust.github.io"
 github_username:    NickBlust
 #facebook_username:  StartBootstrap
 #instagram_username:  
-# linkedin_username:
+linkedin_username: DominikBaumann
 
 # Add your google-analytics ID here to activate google analytics
 #google_analytics:   UA-XXXXXXXXX-X # out your google-analytics code
