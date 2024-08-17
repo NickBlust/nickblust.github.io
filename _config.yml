@@ -13,7 +13,7 @@ github_username:    NickBlust
 linkedin_username: dominik-baumann-53128a323
 
 # Add your google-analytics ID here to activate google analytics
-#google_analytics:   UA-XXXXXXXXX-X # out your google-analytics code
+google_analytics:   G-3CBDR9LJNS # out your google-analytics code
 
 # Build settings
 markdown:           kramdown
